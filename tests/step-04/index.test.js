@@ -3,7 +3,7 @@ const parseQuery = require('../../src/queryParser');
 const executeSELECTQuery = require('../../src/index');
 
 test('Read CSV File', async () => {
-    const data = await readCSV('./sample.csv');
+    const data = await readCSV('./student.csv');
     expect(data.length).toBeGreaterThan(0);
     expect(data.length).toBe(3);
     expect(data[0].name).toBe('John');
@@ -11,16 +11,22 @@ test('Read CSV File', async () => {
 });
 
 test('Parse SQL Query', () => {
-    const query = 'SELECT id, name FROM sample';
+    const query = 'SELECT student.name, enrollment.course FROM student INNER JOIN enrollment ON student.id=enrollment.student_id';
     const parsed = parseQuery(query);
     expect(parsed).toEqual({
-        fields: ['id', 'name'],
-        table: 'sample'
+        fields: ["student.name", "enrollment.course"],
+        table: "student",
+        whereClauses: [],
+        joinTable: "enrollment",
+        joinCondition: {
+            left: "student.id",
+            right: "enrollment.student_id"
+        }
     });
 });
 
 test('Execute SQL Query', async () => {
-    const query = 'SELECT id, name FROM sample';
+    const query = 'SELECT id, name FROM student';
     const result = await executeSELECTQuery(query);
     expect(result.length).toBeGreaterThan(0);
     expect(result[0]).toHaveProperty('id');
